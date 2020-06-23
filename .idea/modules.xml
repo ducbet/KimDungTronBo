@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/KimDungTronBo.iml" filepath="$PROJECT_DIR$/KimDungTronBo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/KimDungTronBo-app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/KimDungTronBo-app.iml" group="KimDungTronBo/app" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/android-KimDungTronBo.iml" filepath="$PROJECT_DIR$/.idea/modules/android-KimDungTronBo.iml" group="KimDungTronBo" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
