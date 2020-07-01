@@ -4,19 +4,22 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:layout_margin="@dimen/dp_5"
-                                    app:cardCornerRadius="@dimen/dp_8">
+                                    app:cardCornerRadius="@dimen/dp_8"
+                                    android:id="@+id/card_background">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/dp_8"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:id="@+id/view_background">
 
         <TextView
-            android:textSize="@dimen/sp_15"
             android:id="@+id/text_view_dename"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/sp_15"
             android:textStyle="bold"/>
 
         <TextView

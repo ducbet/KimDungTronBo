@@ -2,16 +2,14 @@
              xmlns:tools="http://schemas.android.com/tools"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
+             android:background="@android:color/white"
+             android:padding="5dp"
              tools:context="com.kimdung.kimdungtronbo.ReadingFragment">
 
-    <ScrollView
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view_reading_content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <TextView
-            android:id="@+id/text_view_reading_content"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="Reading Fragment"/>
-    </ScrollView>
+        android:layout_height="match_parent"/>
+
 
 </FrameLayout>

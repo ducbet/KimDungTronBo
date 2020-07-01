@@ -3,21 +3,23 @@ package com.kimdung.kimdungtronbo;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.kimdung.kimdungtronbo.adapters.ChapterListAdapter;
 import com.kimdung.kimdungtronbo.database.DatabaseHelper;
-import com.kimdung.kimdungtronbo.models.Chapter;
+import com.kimdung.kimdungtronbo.database.LoadChapterInBackGround;
+import com.kimdung.kimdungtronbo.models.Novel;
+import com.kimdung.kimdungtronbo.models.Paragraph;
 
 import java.util.List;
+
+import static com.kimdung.kimdungtronbo.ReadingActivity.mLoadChapterInBackGround;
 
 
 /**
@@ -25,15 +27,23 @@ import java.util.List;
  */
 public class ChapterListFragment extends Fragment {
 
-    public final static String EXTRA_ST_ID = "stId";
-    private static final String TAG = "ChapterListFragment";
+    //    public final static String EXTRA_ST_ID = "stId";
+    public final static String EXTRA_NOVEL = "novel";
+    private static final String TAG = "TAG_ChapterListFragment";
 
     private RecyclerView mRecyclerViewChapterList;
     private DatabaseHelper mDatabaseHelper;
-    private List<Chapter> mChapterList;
     private ChapterListAdapter mAdapter;
 
-    private int mStId;
+    private Novel mNovel;
+
+    public ChapterListAdapter getAdapter() {
+        return mAdapter;
+    }
+
+    public void setAdapter(ChapterListAdapter adapter) {
+        mAdapter = adapter;
+    }
 
     OnChangeContentReading mOnChangeContentReading;
     OnJumpToReadingFragment mOnJumpToReadingFragment;
@@ -60,7 +70,7 @@ public class ChapterListFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mStId = getArguments().getInt(EXTRA_ST_ID);
+            mNovel = (Novel) getArguments().getSerializable(EXTRA_NOVEL);
         }
     }
 
@@ -79,16 +89,17 @@ public class ChapterListFragment extends Fragment {
     public void onStart() {
         super.onStart();
         // do du lieu vao adapter
-        mChapterList = mDatabaseHelper.getChaptersOfANovel(mStId);
-        mAdapter = new ChapterListAdapter(mChapterList, mOnChangeContentReading);
+//        mDatabaseHelper.getChaptersOfANovel(mNovel); // get chapter trong asyntask
+        mAdapter = new ChapterListAdapter(mNovel.getListChapters(), mOnChangeContentReading);
+        mLoadChapterInBackGround = (LoadChapterInBackGround) new LoadChapterInBackGround().execute(mNovel, mAdapter, getContext());
         mAdapter.setOnJumpToReadingFragment(mOnJumpToReadingFragment);
         mRecyclerViewChapterList.setAdapter(mAdapter);
     }
 
-    public static ChapterListFragment newInstance(int stId) {
-        
+    public static ChapterListFragment newInstance(Novel novel) {
+
         Bundle args = new Bundle();
-        args.putInt(EXTRA_ST_ID, stId);
+        args.putSerializable(EXTRA_NOVEL, novel);
 
         ChapterListFragment fragment = new ChapterListFragment();
         fragment.setArguments(args);
@@ -96,7 +107,7 @@ public class ChapterListFragment extends Fragment {
     }
 
     public interface OnChangeContentReading {
-        public void refresh(String content);
+        public void refresh(List<Paragraph> listParagraph);
     }
 
     public interface OnJumpToReadingFragment {
