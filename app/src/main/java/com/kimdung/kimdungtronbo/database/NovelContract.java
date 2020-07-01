@@ -1,7 +1,5 @@
 package com.kimdung.kimdungtronbo.database;
 
-import android.provider.BaseColumns;
-
 /**
  * Created by Admin on 25/4/2017.
  */

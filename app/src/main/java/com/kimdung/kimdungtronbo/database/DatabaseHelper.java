@@ -4,23 +4,23 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.provider.ContactsContract;
-import android.util.Log;
 
 import com.kimdung.kimdungtronbo.models.Chapter;
 import com.kimdung.kimdungtronbo.models.Novel;
+import com.kimdung.kimdungtronbo.models.Paragraph;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.ParseException;
-import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import static com.kimdung.kimdungtronbo.Rule.ParagraphProcess.splitChapter;
 
 
 /**
@@ -32,7 +32,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public final static String DB_NAME = "kimdung.sqlite";
     public final static int DB_VERSION = 1;
     public final static String PACKAGE_NAME = "com.kimdung.kimdungtronbo";
-    private static final String TAG = "DatabaseHelper";
+    private static final String TAG = "MY_TAG_DatabaseHelper";
 
     private Context mContext;
 
@@ -92,7 +92,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 null,
                 null,
                 null);
-        db.close();
+//        db.close();// sao close la error?
         if (c != null && c.moveToFirst()) {
             String stName = c.getString(c.getColumnIndex(NovelContract.NovelEntry.COLUMN_ST_NAME));
             return stName;
@@ -130,7 +130,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 list.add(novel);
             } while (c.moveToNext());
         }
-        db.close();
+//        db.close();
         return list;
     }
 
@@ -157,29 +157,54 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String deName = c.getString(c.getColumnIndex(NovelContract.ChapterEntry.COLUMN_DE_NAME));
                 String deSource = c.getString(c.getColumnIndex(NovelContract.ChapterEntry.COLUMN_DE_SOURCE));
                 String deContent = c.getString(c.getColumnIndex(NovelContract.ChapterEntry.COLUMN_DE_CONTENT));
+                // tach content thanh tung doan
+                List<Paragraph> listParagraphs = splitChapter(getDeContentChapter(deId));
                 int stId = c.getInt(c.getColumnIndex(NovelContract.ChapterEntry.COLUMN_ST_ID));
                 String stringDeDate = c.getString(c.getColumnIndex(NovelContract.ChapterEntry.COLUMN_DE_DATE));
                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-                Date deDate=null;
+                Date deDate = null;
                 try {
                     deDate = format.parse(stringDeDate);
                 } catch (ParseException e) {
                 }
 
-                Chapter chapter = new Chapter(deId, deName, deSource, deContent, stId, deDate);
+                Chapter chapter = new Chapter(deId, deName, deSource, listParagraphs, stId, deDate);
                 list.add(chapter);
             } while (c.moveToNext());
         }
-        db.close();
+//        db.close();
         return list;
     }
 
-    public List<Chapter> getChaptersOfANovel(int stId) {
-        List<Chapter> list = new ArrayList<>();
+    public String getDeContentChapter(int deID) {
+        String deContent = "";
+        SQLiteDatabase db = getReadableDatabase();
+        String[] columns = {NovelContract.ChapterEntry.COLUMN_DE_ID,
+                NovelContract.ChapterEntry.COLUMN_DE_CONTENT};
+        String selection = NovelContract.ChapterEntry.COLUMN_DE_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(deID)};
+        Cursor c = db.query(NovelContract.ChapterEntry.TABLE_NAME,
+                columns,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                null);
+        if (c != null && c.moveToFirst()) {
+            do {
+                int deId = c.getInt(c.getColumnIndex(NovelContract.ChapterEntry.COLUMN_DE_ID));
+                deContent = c.getString(c.getColumnIndex(NovelContract.ChapterEntry.COLUMN_DE_CONTENT));
+            } while (c.moveToNext());
+        }
+//        db.close();
+        return deContent;
+    }
+
+    public void getChaptersOfANovel(Novel novel) {
         SQLiteDatabase db = getReadableDatabase();
         String selection = NovelContract.ChapterEntry.COLUMN_ST_ID + " = ?";
-        String[] selectionArgs = {stId+""};
+        String[] selectionArgs = {novel.getStId() + ""};
         String[] columns = {NovelContract.ChapterEntry.COLUMN_DE_ID,
                 NovelContract.ChapterEntry.COLUMN_DE_NAME,
                 NovelContract.ChapterEntry.COLUMN_DE_SOURCE,
@@ -200,21 +225,69 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String deName = c.getString(c.getColumnIndex(NovelContract.ChapterEntry.COLUMN_DE_NAME));
                 String deSource = c.getString(c.getColumnIndex(NovelContract.ChapterEntry.COLUMN_DE_SOURCE));
                 String deContent = c.getString(c.getColumnIndex(NovelContract.ChapterEntry.COLUMN_DE_CONTENT));
+                // tach content thanh tung doan
+                List<Paragraph> listParagraphs = splitChapter(getDeContentChapter(deId));
                 int stID = c.getInt(c.getColumnIndex(NovelContract.ChapterEntry.COLUMN_ST_ID));
                 String stringDeDate = c.getString(c.getColumnIndex(NovelContract.ChapterEntry.COLUMN_DE_DATE));
                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-                Date deDate=null;
+                Date deDate = null;
                 try {
                     deDate = format.parse(stringDeDate);
                 } catch (ParseException e) {
                 }
 
-                Chapter chapter = new Chapter(deId, deName, deSource, deContent, stID, deDate);
-                list.add(chapter);
+                Chapter chapter = new Chapter(deId, deName, deSource, listParagraphs, stID, deDate);
+                novel.addChapter(chapter);
             } while (c.moveToNext());
         }
-        db.close();
-        return list;
+//        db.close();
+    }
+
+
+    public Cursor getCursorChaptersOfANovel(Novel novel) {
+        SQLiteDatabase db = getReadableDatabase();
+        String selection = NovelContract.ChapterEntry.COLUMN_ST_ID + " = ?";
+        String[] selectionArgs = {novel.getStId() + ""};
+        String[] columns = {NovelContract.ChapterEntry.COLUMN_DE_ID,
+                NovelContract.ChapterEntry.COLUMN_DE_NAME,
+                NovelContract.ChapterEntry.COLUMN_DE_SOURCE,
+                NovelContract.ChapterEntry.COLUMN_DE_CONTENT,
+                NovelContract.ChapterEntry.COLUMN_ST_ID,
+                NovelContract.ChapterEntry.COLUMN_DE_DATE};
+        Cursor c = db.query(NovelContract.ChapterEntry.TABLE_NAME,
+                columns,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                null);
+        return c;
+    }
+
+    public String getDeContentOfChapters(Chapter chapter) {
+        SQLiteDatabase db = getReadableDatabase();
+
+        String selection = NovelContract.ChapterEntry.COLUMN_DE_ID + " = ?";
+        String[] selectionArgs = {chapter.getDeId() + ""};
+
+        String[] columns = {NovelContract.ChapterEntry.COLUMN_DE_ID,
+                NovelContract.ChapterEntry.COLUMN_DE_CONTENT};
+
+        Cursor c = db.query(NovelContract.ChapterEntry.TABLE_NAME,
+                columns,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                null);
+
+        if (c != null && c.moveToFirst()) {
+            do {
+                String deContent = c.getString(c.getColumnIndex(NovelContract.ChapterEntry.COLUMN_DE_CONTENT));
+                return deContent;
+            } while (c.moveToNext());
+        }
+        // có khi nào vào TH này không?
+        return "";
     }
 }

@@ -1,11 +1,9 @@
 package com.kimdung.kimdungtronbo.adapters;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
-import android.text.Spannable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -67,8 +65,7 @@ public class NovelListAdapter extends RecyclerView.Adapter<NovelListAdapter.View
                 @Override
                 public void onClick(View view) {
                     Intent i = new Intent(mContext, ReadingActivity.class);
-                    i.putExtra(ReadingActivity.EXTRA_ST_ID, novel.getStId());
-                    i.putExtra(ReadingActivity.EXTRA_ST_NAME, novel.getStName());
+                    i.putExtra(ReadingActivity.EXTRA_NOVEL, novel);
                     mContext.startActivity(i);
                 }
             });

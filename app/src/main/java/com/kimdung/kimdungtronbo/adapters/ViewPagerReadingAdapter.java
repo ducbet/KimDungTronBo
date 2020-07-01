@@ -4,10 +4,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 
 import com.kimdung.kimdungtronbo.ChapterListFragment;
 import com.kimdung.kimdungtronbo.ReadingFragment;
+import com.kimdung.kimdungtronbo.models.Novel;
 
 /**
  * Created by Admin on 28/4/2017.
@@ -15,20 +15,37 @@ import com.kimdung.kimdungtronbo.ReadingFragment;
 
 public class ViewPagerReadingAdapter extends FragmentPagerAdapter implements ChapterListFragment.OnJumpToReadingFragment {
 
-    private static final String TAG = "ViewPagerReadingAdapter";
+    private static final String TAG = "MY_TAG_ViewPagerReadingAdapter";
     private String[] mTitles = {"MỤC LỤC", "ĐỌC TRUYỆN"};
-    private int mStId;
+    //    private int mStId;
+    private Novel mNovel;
 
     ChapterListFragment mChapterListFragment;
     ReadingFragment mReadingFragment;
     ViewPager mViewPager;
 
-    public ViewPagerReadingAdapter(FragmentManager fm, int stId, ViewPager viewPager) {
+    public ChapterListFragment getChapterListFragment() {
+        return mChapterListFragment;
+    }
+
+    public void setChapterListFragment(ChapterListFragment chapterListFragment) {
+        mChapterListFragment = chapterListFragment;
+    }
+
+    public ReadingFragment getReadingFragment() {
+        return mReadingFragment;
+    }
+
+    public void setReadingFragment(ReadingFragment readingFragment) {
+        mReadingFragment = readingFragment;
+    }
+
+    public ViewPagerReadingAdapter(FragmentManager fm, Novel novel, ViewPager viewPager) {
         super(fm);
-        mStId = stId;
+        mNovel = novel;
         mViewPager = viewPager;
 
-        mChapterListFragment = ChapterListFragment.newInstance(mStId);
+        mChapterListFragment = ChapterListFragment.newInstance(mNovel);
         mReadingFragment = ReadingFragment.newInstance();
         mChapterListFragment.setOnChangeContentReading(mReadingFragment);
         mChapterListFragment.setOnJumpToReadingFragment(this);
@@ -51,10 +68,10 @@ public class ViewPagerReadingAdapter extends FragmentPagerAdapter implements Cha
         return mTitles.length;
     }
 
-    @Override
-    public CharSequence getPageTitle(int position) {
-        return mTitles[position];
-    }
+//    @Override
+//    public CharSequence getPageTitle(int position) {
+//        return mTitles[position];
+//    }
 
     public void changeToReadingFragment() {
         mViewPager.setCurrentItem(1);
